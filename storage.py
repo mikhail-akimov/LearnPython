@@ -14,8 +14,7 @@ storage_path = os.path.join(tempfile.gettempdir(), 'storage.data')
 def read():
     try:
         with open(storage_path, 'r', encoding='utf-8') as ro:
-            result = json.loads(ro.read())
-            return result
+            return json.loads(ro.read())
     except FileNotFoundError:
         with open(storage_path, 'w', encoding='utf-8') as cr:
             d = {}
@@ -26,24 +25,16 @@ def read():
 
 def write(line_to_write):
     with open(storage_path, 'w', encoding='utf-8') as w:
-        line = json.dumps(line_to_write)
-        w.write(line)
-        print('saved...')
+        w.write(json.dumps(line_to_write))
 
 
 if args.key and not args.value:
-    print(read().get(args.key))
+    print(read()[args.key])
 else:
     d = read()
-    try:
-        if d.get(args.key) is None:
-            d[args.key] = str(args.value)
-        else:
-            new_value = str(d.get(args.key) + ', ' + args.value)
-            d[args.key] = new_value
-    except KeyError:
-        d[args.key] = str(args.value)
-        print(d)
-        print(type(d))
-    result_w = d
-    write(result_w)
+    if d[args.key] is None:
+        d[args.key] = args.value
+    else:
+        d[args.key] = d[args.key] + ', ' + args.value
+    write(d)
+
