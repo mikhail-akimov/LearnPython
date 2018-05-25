@@ -9,5 +9,5 @@ class FileReader:
         except IOError:
             return ""
 
-reader = FileReader(r'C:\Users\makimov.SCLUB\PycharmProjects\LearnPython\Coursera\env\stairs.py')
+reader = FileReader(r'stairs.py')
 print(reader.read(reader.url))
