@@ -1,8 +1,27 @@
 import socket
 import json
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-a", help="Enter address to listen")
+parser.add_argument("-p", help="Enter port to listen")
+args = parser.parse_args()
+
+if not args.a:
+    host = ""
+else:
+    host = args.a
+
+if not args.p:
+    port = int(7777)
+else:
+    port = int(args.p)
+
+print(host, port)
+
 
 with socket.socket() as sock:
-    sock.bind(("", 7777))
+    sock.bind((host, port))
     sock.listen()
 
     while True:

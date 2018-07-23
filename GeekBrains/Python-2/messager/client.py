@@ -21,7 +21,7 @@ def presence():
         "type": "status",
         "user": {
             "account_name": 'test_user',
-            "status": "i`m here"
+            "status": "i`m here!"
         }
     }
     return json.dumps(message)
@@ -32,7 +32,7 @@ def auth():
         "action": "authenticate",
         "time": int(time()),
         "user": {
-            "account_neme": "user",
+            "account_name": "user",
             "password": "password"
         }
     }
@@ -42,7 +42,9 @@ try:
     with socket.create_connection((host, port)) as sock:
         sock.sendall(presence().encode("utf-8"))
         data = json.loads(sock.recv(1024).decode("utf-8"))
-        print(data)
+        print(data['response'])
+
 
 except ConnectionRefusedError as ex:
     print(ex)
+
