@@ -1,0 +1,4 @@
+[
+  "test_client.py::test_capital_case",
+  "test_client.py::test_raises_exception_on_non_strung_arguments"
+]

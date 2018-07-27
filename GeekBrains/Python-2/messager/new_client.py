@@ -26,11 +26,22 @@ class Client:
 
     def recive_response(self):
         data = json.loads(self.sock.recv(1024).decode('utf-8'))
-        print(data)
+        return data
+
+    def auth(self, login, password):
+        message = {
+            "action": "authenticate",
+            "time": int(time()),
+            "user": {
+                "account_name": login,
+                "password": password
+            }
+        }
+        return message
 
     def presense(self):
         message = {
-            "action": "presence",
+            "action": "presense",
             "time": int(time()),
             "type": "status",
             "user": {
@@ -38,7 +49,6 @@ class Client:
                 "status": "i`m here!"
             }
         }
-
         return message
 
 
@@ -59,8 +69,17 @@ def client_start():
 
         return host, port
 
-
-client = Client(client_start()[0], client_start()[1])
-client.connect()
-client.send_message(client.presense())
+if __name__ == "__main__":
+    client = Client(client_start()[0], client_start()[1])
+    client.connect()
+    # client.send_message(client.presense())
+    while True:
+        try:
+            login = input('Enter login name: ')
+            password = input('Enter password: ')
+            client.send_message(client.auth(login, password))
+            # я не могу понять, почему соединение разрывается перед второй попыткой послать сообщение.
+        except KeyboardInterrupt:
+            client.sock.close()
+            sys.exit(0)
 
