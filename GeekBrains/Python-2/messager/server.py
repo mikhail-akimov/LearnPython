@@ -34,9 +34,15 @@ with socket.socket() as sock:
 
             print(data)
 
-            if data["action"] == "presence":
+            if data["action"] == "presense":
                 response = {
                     "response": 200
+                }
+                response = json.dumps(response).encode("utf-8")
+                conn.sendall(response)
+            else:
+                response = {
+                    "response": 300
                 }
                 response = json.dumps(response).encode("utf-8")
                 conn.sendall(response)
