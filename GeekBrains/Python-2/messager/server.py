@@ -28,21 +28,22 @@ with socket.socket() as sock:
         conn, addr = sock.accept()
 
         with conn:
-            data = json.loads(conn.recv(1024).decode("utf-8"))
-            if not data:
-                break
+            while True:
+                data = json.loads(conn.recv(1024).decode("utf-8"))
+                if not data:
+                    break
 
-            print(data)
+                print(data)
 
-            if data["action"] == "presense":
-                response = {
-                    "response": 200
-                }
-                response = json.dumps(response).encode("utf-8")
-                conn.sendall(response)
-            else:
-                response = {
-                    "response": 300
-                }
-                response = json.dumps(response).encode("utf-8")
-                conn.sendall(response)
+                if data["action"] == "presence":
+                    response = {
+                        "response": 200
+                    }
+                    response = json.dumps(response).encode("utf-8")
+                    conn.sendall(response)
+                else:
+                    response = {
+                        "response": 300
+                    }
+                    response = json.dumps(response).encode("utf-8")
+                    conn.sendall(response)

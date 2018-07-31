@@ -1,16 +1,42 @@
 import pytest
+import sys
+import new_client
+from time import time
 
 
-def capital_case(x):
-    if not isinstance(x, str):
-        raise TypeError('Please provide a string argument')
-    return x.capitalize()
+def test_auth_msg():
+    msg = new_client.Client.auth('self', 'login', 'password')
+
+    assert msg == {
+            "action": "authenticate",
+            "time": int(time()),
+            "user": {
+                "account_name": 'login',
+                "password": 'password'
+            }
+        }
 
 
-def test_capital_case():
-    assert capital_case('spirit') == 'Spirit'
+def test_presence_msg():
+    msg = new_client.Client.presence('self')
+
+    assert msg == {
+            "action": "presence",
+            "time": int(time()),
+            "type": "status",
+            "user": {
+                "account_name": 'test_user',
+                "status": "i`m here!"
+            }
+        }
 
 
-def test_raises_exception_on_non_strung_arguments():
-    with pytest.raises(TypeError):
-        capital_case(9)
+def test_connection():
+    sys.argv[0] = 'test.py'
+    sys.argv[1] = '127.0.0.1'
+    sys.argv[2] = '7777'
+    # и почему тут ошибка IndexError: list assignment index out of range?
+    start = new_client.client_start()
+    # не понимаю, почему мне функция позвращает всего 2 значения без порта
+    assert start[0] == '127.0.0.1'
+    assert start[1] == '7777'
