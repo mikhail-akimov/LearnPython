@@ -1,49 +1,60 @@
 import socket
 import json
 import argparse
+import select
+import time
 
-parser = argparse.ArgumentParser()
-parser.add_argument("-a", help="Enter address to listen")
-parser.add_argument("-p", help="Enter port to listen")
+parser = argparse.ArgumentParser(description='Server side')
+parser.add_argument("-a", help="Enter address to listen", default='')
+parser.add_argument("-p", help="Enter port to listen", type=int, default=7777)
 args = parser.parse_args()
-
-if not args.a:
-    host = ""
-else:
-    host = args.a
-
-if not args.p:
-    port = int(7777)
-else:
-    port = int(args.p)
-
-print(host, port)
 
 
 with socket.socket() as sock:
-    sock.bind((host, port))
+    sock.bind((args.a, args.p))
     sock.listen()
+    sock.settimeout(0.2)
+    clients = []
 
     while True:
-        conn, addr = sock.accept()
+        try:
+            conn, addr = sock.accept()
+        except OSError as e:
+            pass
+        else:
+            print('Получен запрос на подключение от {}'.format(addr))
+            clients.append(conn)
+        finally:
+            w = []
 
-        with conn:
-            while True:
-                data = json.loads(conn.recv(1024).decode("utf-8"))
-                if not data:
-                    break
+            try:
+                r, w, e = select.select([], clients, [], 0)
+            except Exception as e:
+                pass
 
-                print(data)
+            for s_client in w:
+                print('here')
+                timestr = time.ctime(time.time()) + '\n'
+                try:
+                    s_client.send(timestr.encode('utf-8'))
+                    # with conn:
+                    #     data = json.loads(conn.recv(1024).decode("utf-8"))
+                    #     if not data:
+                    #         break
+                    #     print(data)
+                    #     if data["action"] == "presence":
+                    #         response = {
+                    #             "response": 200
+                    #         }
+                    #         response = json.dumps(response).encode("utf-8")
+                    #         conn.sendall(response)
+                    #     else:
+                    #         response = {
+                    #             "response": 300
+                    #         }
+                    #         response = json.dumps(response).encode("utf-8")
+                    #         conn.sendall(response)
+                except:
+                    clients.remove(s_client)
+                    print('{} удалён'.format(s_client))
 
-                if data["action"] == "presence":
-                    response = {
-                        "response": 200
-                    }
-                    response = json.dumps(response).encode("utf-8")
-                    conn.sendall(response)
-                else:
-                    response = {
-                        "response": 300
-                    }
-                    response = json.dumps(response).encode("utf-8")
-                    conn.sendall(response)

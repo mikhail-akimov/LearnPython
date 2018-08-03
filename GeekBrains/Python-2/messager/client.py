@@ -2,6 +2,7 @@ import socket
 import sys
 from time import time
 import json
+import argparse
 
 
 class Client:
@@ -25,7 +26,7 @@ class Client:
         self.recive_response()
 
     def recive_response(self):
-        data = json.loads(self.sock.recv(1024).decode('utf-8'))
+        data = self.sock.recv(1024).decode('utf-8')
         return data
 
     def auth(self, login, password):
@@ -51,33 +52,23 @@ class Client:
         }
         return message
 
-
-def client_start():
-    if len(sys.argv) == 1:
-        print('Enter host name and port')
-        sys.exit(1)
-    elif len(sys.argv[1]) < 7:
-        print('Incorrect server-address')
-        sys.exit(1)
-    else:
-        host = sys.argv[1]
-
-        if len(sys.argv) < 3:
-            port = str(7777)
-        else:
-            port = sys.argv[2]
-
-        return host, port
-
 if __name__ == "__main__":
-    client = Client(client_start()[0], client_start()[1])
+    parser = argparse.ArgumentParser(description='Client app')
+    parser.add_argument('-address', help='Server host', default='localhost')
+    parser.add_argument('-port', help='Server port', type=int, default=7777)
+    args = parser.parse_args()
+
+    print(args.address, args.port)
+
+    client = Client(args.address, args.port)
     client.connect()
     client.send_message(client.presence())
     while True:
         try:
-            login = input('Enter login name: ')
-            password = input('Enter password: ')
-            client.send_message(client.auth(login, password))
+            print(client.recive_response())
+            # login = input('Enter login name: ')
+            # password = input('Enter password: ')
+            # client.send_message(client.auth(login, password))
         except KeyboardInterrupt:
             client.sock.close()
             sys.exit(0)
