@@ -1,5 +1,0 @@
-{
-  "test_client.py::test_connection": true,
-  "test_server.py": true,
-  "test_server.py::test_conn": true
-}
