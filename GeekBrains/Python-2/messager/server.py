@@ -26,17 +26,40 @@ with socket.socket() as sock:
             clients.append(conn)
         finally:
             w = []
+            r = []
 
             try:
-                r, w, e = select.select([], clients, [], 0)
+                r, w, e = select.select(clients, clients, [], 0)
             except Exception as e:
                 pass
-
-            for s_client in w:
-                print('here')
-                timestr = time.ctime(time.time()) + '\n'
+            for client in clients:
                 try:
-                    s_client.send(timestr.encode('utf-8'))
+                    if client in r:
+                        msg = client.recv(1024).decode('utf-8')
+                        if msg != '':
+                            print('Recived {} from {}'.format(msg, client))
+
+                            for client_r in clients:
+                                client_r.sendall(msg.encode('utf-8'))
+                                print('Sended {} to {}'.format(msg, client_r))
+                    # if client in w:
+                    #     print('Sended message to {}'.format(client))
+                    # elif client in r:
+                    #     msg = client.recv(1024).decode('utf-8')
+                    #     print('Recived {} from {}'.format(msg, client))
+                        else:
+                            break
+
+                except:
+                    clients.remove(client)
+                    print('{} удалён'.format(client))
+
+            # for s_client in w:
+            #     print('here')
+            #     timestr = time.ctime(time.time()) + '\n'
+            #     try:
+            #         s_client.send(timestr.encode('utf-8'))
+
                     # with conn:
                     #     data = json.loads(conn.recv(1024).decode("utf-8"))
                     #     if not data:
@@ -54,7 +77,3 @@ with socket.socket() as sock:
                     #         }
                     #         response = json.dumps(response).encode("utf-8")
                     #         conn.sendall(response)
-                except:
-                    clients.remove(s_client)
-                    print('{} удалён'.format(s_client))
-

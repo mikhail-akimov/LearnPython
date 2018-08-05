@@ -55,7 +55,7 @@ class Client:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Client app')
     parser.add_argument('-address', help='Server host', default='localhost')
-    parser.add_argument('-port', help='Server port', type=int, default=7777)
+    parser.add_argument('-port', help='Server port', type=int, default=7778)
     args = parser.parse_args()
 
     print(args.address, args.port)
