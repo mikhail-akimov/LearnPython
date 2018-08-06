@@ -10,6 +10,12 @@ parser.add_argument("-p", help="Enter port to listen", type=int, default=7777)
 args = parser.parse_args()
 
 
+def presence_response():
+    response = {
+        "response": 200}
+    response = json.dumps(response).encode("utf-8")
+    return response
+
 with socket.socket() as sock:
     sock.bind((args.a, args.p))
     sock.listen()
@@ -35,30 +41,22 @@ with socket.socket() as sock:
             for client in clients:
                 try:
                     if client in r:
-                        msg = client.recv(1024).decode('utf-8')
-                        if msg != '':
-                            print('Recived {} from {}'.format(msg, client))
+                        msg = json.loads(client.recv(1024).decode('utf-8'))
+                        if msg['action'] == "presence":
+                            client.sendall(presence_response())
+                        elif msg['action'] == 'msg':
+                            print('Recived {} from {}'.format(msg, client.getpeername()))
 
                             for client_r in clients:
-                                client_r.sendall(msg.encode('utf-8'))
-                                print('Sended {} to {}'.format(msg, client_r))
-                    # if client in w:
-                    #     print('Sended message to {}'.format(client))
-                    # elif client in r:
-                    #     msg = client.recv(1024).decode('utf-8')
-                    #     print('Recived {} from {}'.format(msg, client))
+                                client_r.sendall(json.dumps(msg['message']).encode('utf-8'))
+                                print('Sended {} to {}'.format(msg['message'], client_r.getpeername()))
                         else:
                             break
-
                 except:
                     clients.remove(client)
                     print('{} удалён'.format(client))
 
-            # for s_client in w:
-            #     print('here')
-            #     timestr = time.ctime(time.time()) + '\n'
-            #     try:
-            #         s_client.send(timestr.encode('utf-8'))
+
 
                     # with conn:
                     #     data = json.loads(conn.recv(1024).decode("utf-8"))
@@ -77,3 +75,5 @@ with socket.socket() as sock:
                     #         }
                     #         response = json.dumps(response).encode("utf-8")
                     #         conn.sendall(response)
+
+

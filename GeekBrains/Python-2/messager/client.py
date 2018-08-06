@@ -23,7 +23,6 @@ class Client:
 
     def send_message(self, message):
         self.sock.sendall(json.dumps(message).encode('utf-8'))
-        self.recive_response()
 
     def recive_response(self):
         data = self.sock.recv(1024).decode('utf-8')
@@ -52,10 +51,21 @@ class Client:
         }
         return message
 
+    def message(self, text):
+        message = {
+            "action": "msg",
+            "time": int(time()),
+            "to": '#room_name',
+            "from": 'account_name',
+            'message': str(text)
+        }
+        return message
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Client app')
     parser.add_argument('-address', help='Server host', default='localhost')
-    parser.add_argument('-port', help='Server port', type=int, default=7778)
+    parser.add_argument('-port', help='Server port', type=int, default=7777)
+    parser.add_argument('-mode', help='Read only mode', type=str, default='w')
     args = parser.parse_args()
 
     print(args.address, args.port)
@@ -64,12 +74,22 @@ if __name__ == "__main__":
     client.connect()
     client.send_message(client.presence())
     while True:
-        try:
-            print(client.recive_response())
-            # login = input('Enter login name: ')
-            # password = input('Enter password: ')
-            # client.send_message(client.auth(login, password))
-        except KeyboardInterrupt:
-            client.sock.close()
-            sys.exit(0)
+        if args.mode == 'r':
+            try:
+                while True:
+                    data = client.recive_response()
+                    if data:
+                        print('Response :', data)
+            except KeyboardInterrupt:
+                client.sock.close()
+                sys.exit(0)
+        elif args.mode == 'w':
+            try:
+                msg = input('Your message:')
 
+                if msg == 'exit':
+                    break
+                client.send_message(client.message(msg))
+            except KeyboardInterrupt:
+                client.sock.close()
+                sys.exit(0)
