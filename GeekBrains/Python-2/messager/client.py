@@ -64,12 +64,12 @@ class Client:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Client app')
-    parser.add_argument('-address', help='Server host', default='localhost')
-    parser.add_argument('-port', help='Server port', type=int, default=7777)
-    parser.add_argument('-mode', help='Read only mode', type=str, default='w')
+    parser.add_argument('address', help='Server host', default='localhost')
+    parser.add_argument('port', help='Server port', type=int, default=7777)
+    parser.add_argument('mode', help='Read/write mode', type=str)
     args = parser.parse_args()
 
-    print(args.address, args.port)
+    print(args)
 
     client = Client(args.address, args.port)
     client.connect()
@@ -94,3 +94,5 @@ if __name__ == "__main__":
             except KeyboardInterrupt:
                 client.sock.close()
                 sys.exit(0)
+        else:
+            print('Impossible scenario')
