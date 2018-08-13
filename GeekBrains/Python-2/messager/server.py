@@ -10,11 +10,21 @@ parser.add_argument("-p", help="Enter port to listen", type=int, default=7777)
 args = parser.parse_args()
 
 
+def receive(sender):
+    message = json.loads(sender.recv(1024).decode('utf-8'))
+    return message
+
+
+def send(message, receiver):
+    receiver.sendall(json.dumps(message).encode('utf-8'))
+
+
 def presence_response():
     response = {
         "response": 200}
     response = json.dumps(response).encode("utf-8")
     return response
+
 
 with socket.socket() as sock:
     sock.bind((args.a, args.p))
@@ -38,17 +48,17 @@ with socket.socket() as sock:
                 r, w, e = select.select(clients, clients, [], 0)
             except Exception as e:
                 pass
-            for client in clients:
+            for client in w:
                 try:
                     if client in r:
-                        msg = json.loads(client.recv(1024).decode('utf-8'))
+                        msg = receive(client)
                         if msg['action'] == "presence":
                             client.sendall(presence_response())
                         elif msg['action'] == 'msg':
-                            print('Recived {} from {}'.format(msg, client.getpeername()))
+                            print('received {} from {}'.format(msg, client.getpeername()))
 
                             for client_r in clients:
-                                client_r.sendall(json.dumps(msg['message']).encode('utf-8'))
+                                send(msg['message'], client_r)
                                 print('Sended {} to {}'.format(msg['message'], client_r.getpeername()))
                         else:
                             break
@@ -75,5 +85,3 @@ with socket.socket() as sock:
                     #         }
                     #         response = json.dumps(response).encode("utf-8")
                     #         conn.sendall(response)
-
-

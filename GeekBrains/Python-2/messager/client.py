@@ -24,7 +24,7 @@ class Client:
     def send_message(self, message):
         self.sock.sendall(json.dumps(message).encode('utf-8'))
 
-    def recive_response(self):
+    def receive_response(self):
         data = self.sock.recv(1024).decode('utf-8')
         return data
 
@@ -61,6 +61,7 @@ class Client:
         }
         return message
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Client app')
     parser.add_argument('-address', help='Server host', default='localhost')
@@ -77,7 +78,7 @@ if __name__ == "__main__":
         if args.mode == 'r':
             try:
                 while True:
-                    data = client.recive_response()
+                    data = client.receive_response()
                     if data:
                         print('Response :', data)
             except KeyboardInterrupt:
