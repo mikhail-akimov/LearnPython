@@ -8,3 +8,5 @@ def log(msg):
             func(*args, **kwargs)
         return wrapper
     return log_add
+
+# test
