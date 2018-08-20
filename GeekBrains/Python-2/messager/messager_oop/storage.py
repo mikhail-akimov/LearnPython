@@ -56,3 +56,5 @@ class ContactList(Storage):
         return self.cursor.execute('select * from ContactList where owner_id =?', owner)
 
 # Storage.create_new(Storage)
+
+#still not working
