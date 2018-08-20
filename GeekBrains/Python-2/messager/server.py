@@ -1,48 +1,79 @@
 import socket
 import json
 import argparse
+import select
+import time
 
-parser = argparse.ArgumentParser()
-parser.add_argument("-a", help="Enter address to listen")
-parser.add_argument("-p", help="Enter port to listen")
+parser = argparse.ArgumentParser(description='Server side')
+parser.add_argument("-a", help="Enter address to listen", default='')
+parser.add_argument("-p", help="Enter port to listen", type=int, default=7777)
 args = parser.parse_args()
 
-if not args.a:
-    host = ""
-else:
-    host = args.a
 
-if not args.p:
-    port = int(7777)
-else:
-    port = int(args.p)
-
-print(host, port)
-
+def presence_response():
+    response = {
+        "response": 200}
+    response = json.dumps(response).encode("utf-8")
+    return response
 
 with socket.socket() as sock:
-    sock.bind((host, port))
+    sock.bind((args.a, args.p))
     sock.listen()
+    sock.settimeout(0.2)
+    clients = []
 
     while True:
-        conn, addr = sock.accept()
+        try:
+            conn, addr = sock.accept()
+        except OSError as e:
+            pass
+        else:
+            print('Получен запрос на подключение от {}'.format(addr))
+            clients.append(conn)
+        finally:
+            w = []
+            r = []
 
-        with conn:
-            data = json.loads(conn.recv(1024).decode("utf-8"))
-            if not data:
-                break
+            try:
+                r, w, e = select.select(clients, clients, [], 0)
+            except Exception as e:
+                pass
+            for client in clients:
+                try:
+                    if client in r:
+                        msg = json.loads(client.recv(1024).decode('utf-8'))
+                        if msg['action'] == "presence":
+                            client.sendall(presence_response())
+                        elif msg['action'] == 'msg':
+                            print('Recived {} from {}'.format(msg, client.getpeername()))
 
-            print(data)
+                            for client_r in clients:
+                                client_r.sendall(json.dumps(msg['message']).encode('utf-8'))
+                                print('Sended {} to {}'.format(msg['message'], client_r.getpeername()))
+                        else:
+                            break
+                except:
+                    clients.remove(client)
+                    print('{} удалён'.format(client))
 
-            if data["action"] == "presense":
-                response = {
-                    "response": 200
-                }
-                response = json.dumps(response).encode("utf-8")
-                conn.sendall(response)
-            else:
-                response = {
-                    "response": 300
-                }
-                response = json.dumps(response).encode("utf-8")
-                conn.sendall(response)
+
+
+                    # with conn:
+                    #     data = json.loads(conn.recv(1024).decode("utf-8"))
+                    #     if not data:
+                    #         break
+                    #     print(data)
+                    #     if data["action"] == "presence":
+                    #         response = {
+                    #             "response": 200
+                    #         }
+                    #         response = json.dumps(response).encode("utf-8")
+                    #         conn.sendall(response)
+                    #     else:
+                    #         response = {
+                    #             "response": 300
+                    #         }
+                    #         response = json.dumps(response).encode("utf-8")
+                    #         conn.sendall(response)
+
+

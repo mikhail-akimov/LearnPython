@@ -1,50 +1,95 @@
 import socket
-import json
 import sys
 from time import time
-
-if len(sys.argv) == 1:
-    print('Please enter host address...')
-    sys.exit(1)
-elif len(sys.argv) == 2:
-    port = 7777
-else:
-    port = sys.argv[2]
-
-host = sys.argv[1]
+import json
+import argparse
 
 
-def presence():
-    message = {
-        "action": "presence",
-        "time": int(time()),
-        "type": "status",
-        "user": {
-            "account_name": 'test_user',
-            "status": "i`m here!"
+class Client:
+    def __init__(self, host, port):
+        self.host = host
+        self.port = port
+        self.sock = None
+
+    def connect(self):
+        try:
+            self.sock = socket.create_connection((self.host, self.port))
+        except ConnectionRefusedError as ex:
+            print(ex)
+            sys.exit(1)
+        except KeyboardInterrupt:
+            self.sock.close()
+            sys.exit(1)
+
+    def send_message(self, message):
+        self.sock.sendall(json.dumps(message).encode('utf-8'))
+
+    def recive_response(self):
+        data = self.sock.recv(1024).decode('utf-8')
+        return data
+
+    def auth(self, login, password):
+        message = {
+            "action": "authenticate",
+            "time": int(time()),
+            "user": {
+                "account_name": login,
+                "password": password
+            }
         }
-    }
-    return json.dumps(message)
+        return message
 
-
-def auth():
-    message = {
-        "action": "authenticate",
-        "time": int(time()),
-        "user": {
-            "account_name": "user",
-            "password": "password"
+    def presence(self):
+        message = {
+            "action": "presence",
+            "time": int(time()),
+            "type": "status",
+            "user": {
+                "account_name": 'test_user',
+                "status": "i`m here!"
+            }
         }
-    }
-    return json.dumps(message)
+        return message
 
-try:
-    with socket.create_connection((host, port)) as sock:
-        sock.sendall(presence().encode("utf-8"))
-        data = json.loads(sock.recv(1024).decode("utf-8"))
-        print(data['response'])
+    def message(self, text):
+        message = {
+            "action": "msg",
+            "time": int(time()),
+            "to": '#room_name',
+            "from": 'account_name',
+            'message': str(text)
+        }
+        return message
 
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Client app')
+    parser.add_argument('-address', help='Server host', default='localhost')
+    parser.add_argument('-port', help='Server port', type=int, default=7777)
+    parser.add_argument('-mode', help='Read only mode', type=str, default='w')
+    args = parser.parse_args()
 
-except ConnectionRefusedError as ex:
-    print(ex)
+    print(args.address, args.port)
 
+    client = Client(args.address, args.port)
+    client.connect()
+    client.send_message(client.presence())
+    while True:
+        if args.mode == 'r':
+            try:
+                while True:
+                    data = client.recive_response()
+                    if data:
+                        print('Response :', data)
+            except KeyboardInterrupt:
+                client.sock.close()
+                sys.exit(0)
+        elif args.mode == 'w':
+            try:
+                msg = input('Your message:')
+
+                if msg == 'exit':
+                    break
+                client.send_message(client.message(msg))
+            except KeyboardInterrupt:
+                client.sock.close()
+                sys.exit(0)
