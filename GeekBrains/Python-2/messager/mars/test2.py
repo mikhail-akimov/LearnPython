@@ -1,61 +1,60 @@
+import sys
+
 # ID;Вес;ID несовместимых предметов через запятую;Ценность для экспедиции;
 
-
-class Item:
-    def __init__(self, id, weight, errors, value):
-        self.id = id
-        self.weight = weight
-        self.errors = errors
-        self.value = value
-
-
-class Module:
-    def __init__(self):
-        self.maxweight = 200
-        self.on_board = []
-
-    def __set__(self, instance, value):
-        pass
-
-
 def sortbyvalue(to_sort):
-    return to_sort[3]
+    return int(to_sort[3]) / int(to_sort[1])
 
 
-def check(box, shattles):
-    for shattle in shattles:
-        print('Checking Shattle {}'.format(shattle))
-        if len(shattle) > 0:
+def check(box, shuttles):
+    for shuttle in shuttles:
+        # print('Checking shuttle {}'.format(shuttle))
+        if len(shuttle) > 0:
             toexit = 0
-            for l_box in shattle:
-                print('Checking box {}'.format(l_box))
-                if box[0] in l_box[2] or l_box[0] in box[2]:
-                    print('Суда низя')
-                    toexit = 1
-                    break
-                else:
+            total_weight = 0
+            for l_box in shuttle:
+                total_weight += int(l_box[1])
+            # print('Total WEIGHT = {}, next box += {}'.format(total_weight, int(box[1])))
+            if total_weight + int(box[1]) <= 200:
+                for l_box in shuttle:
+                    # print('Checking box {}'.format(l_box))
+                    if box[0] in l_box[2] or l_box[0] in box[2]:
+                        # print('Суда низя')
+                        toexit = 1
+                        break
+                    else:
+                        continue
+                if toexit:
+                    # print('Stop')
                     continue
-            if toexit:
-                print('Stop')
-                continue
+                else:
+                    # print('Next')
+                    # print('Добавляю1 {} в {}'.format(box, shuttle))
+                    shuttle.append(box)
+                    all.remove(box)
+                    break
             else:
-                print('Next')
-                print('Добавляю1 {} в {}'.format(box, shattle))
-                shattle.append(box)
-                break
+                continue
         else:
-            print('Добавляю2 {} в {}'.format(box, shattle))
-            shattle.append(box)
+            # print('Добавляю2 {} в {}'.format(box, shuttle))
+            shuttle.append(box)
+            all.remove(box)
             break
-    print('Here i am')
+    # print('Here i am')
 
-    return True
+
+def print_shuttle(shuttle):
+    total_boxes = ''
+    for i in shuttle:
+        total_boxes += i[0] + ';'
+    print(total_boxes)
+
 
 all = []
-all_id = []
-shattles = ([], [])
+shuttles = ([], [])
 
-with open('test3.txt') as f:
+
+with open('test2.txt') as f:
     lst = f.read().split('\n')
     for i in lst:
         new_lst = i.split(';')
@@ -65,10 +64,10 @@ with open('test3.txt') as f:
 
     all.sort(key=sortbyvalue, reverse=True)
     for i in all:
-        print('Checking {} in {}'.format(i, shattles))
-        check(i, shattles)
-    print(shattles[0])
-    print(shattles)
+        # print('Checking {} in {}'.format(i, shuttles))
+        check(i, shuttles)
+    # print(shuttles[0])
+    # print(shuttles)
     print(all)
-
-
+    for shuttle in shuttles:
+        print_shuttle(shuttle)
