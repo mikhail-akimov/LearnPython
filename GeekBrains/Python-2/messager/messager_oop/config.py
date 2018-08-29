@@ -12,7 +12,7 @@ class Config:
                 "port": self.port,
                 "listen": self.listen,
                 "timeout": self.timeout
-        }
+                }
 
 
 class LoadFromFile:
@@ -28,13 +28,22 @@ class LoadFromConsole:
 
     def load(self):
         host = input("Input host: ")
-        port = input("Input port: ")
-        listen = input("Input listen: ")
-        timeout = input("Input timeout: ")
+        port = int(input("Input port: "))
+        listen = int(input("Input listen: "))
+        timeout = int(input("Input timeout: "))
 
-        return (host, port, listen, timeout)
+        return host, port, listen, timeout
 
 
 class LoadFromArgparse:
     pass
 
+
+class LoadFromParams:
+    def load(self):
+        host = 'localhost'
+        port = 7777
+        listen = 10
+        timeout = 0.2
+
+        return host, port, listen, timeout
