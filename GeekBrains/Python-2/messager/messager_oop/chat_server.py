@@ -27,22 +27,20 @@ class ChatServer(Chat):
     def connect(self):
         self.s.bind((self.host, self.port))
         self.s.listen(self.listen)
-        # self.s.settimeout(self.timeout)
+        self.s.settimeout(self.timeout)
 
     def start_chat(self):
         raise NotImplementedError
 
     def main_loop(self):
         while True:
-            print('Cycling...')
             try:
                 conn, addr = self.s.accept()
             except OSError as e:
-                print(e)
+                pass
             else:
                 print('Получен запрос на подключение от {}'.format(addr))
                 self.clients.append(conn)
-
             finally:
                 w = []
                 r = []
@@ -51,10 +49,8 @@ class ChatServer(Chat):
                     r, w, e = select.select(self.clients, self.clients, [], 0)
 
                 except Exception as e:
-                    print(e)
+                    pass
 
-                print('W-list is {}'.format(w))
-                print('R-list is {}'.format(r))
                 for client in self.clients:
                     try:
                         client.send(b'Hello world!')
