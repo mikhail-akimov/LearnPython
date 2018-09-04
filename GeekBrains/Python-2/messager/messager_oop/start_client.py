@@ -8,6 +8,4 @@ if __name__ == '__main__':
 
     client = ChatClient(config.get_dict_config())
 
-    while True:
-        print('Waiting...')
-        print(client.receive_message())
+    client.main_loop()

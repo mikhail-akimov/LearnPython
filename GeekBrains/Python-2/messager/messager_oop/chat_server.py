@@ -1,6 +1,6 @@
 from chat import Chat
-import asyncio
 import select
+from jim import convert_from_bytes
 
 
 class ChatServer(Chat):
@@ -11,7 +11,8 @@ class ChatServer(Chat):
         self.client = None
         self.address = None
         self.connect()
-        self.clients = []
+        self.new_clients = []
+        self.clients = dict()
 
     def _setup(self, config):
         self.timeout = config["timeout"]
@@ -35,27 +36,39 @@ class ChatServer(Chat):
     def main_loop(self):
         while True:
             try:
+
                 conn, addr = self.s.accept()
+
             except OSError as e:
                 pass
             else:
                 print('Получен запрос на подключение от {}'.format(addr))
-                self.clients.append(conn)
+                self.new_clients.append(conn)
             finally:
-                w = []
                 r = []
-
+                w = []
+                e = []
                 try:
-                    r, w, e = select.select(self.clients, self.clients, [], 0)
+                    r, w, e = select.select(self.new_clients, self.new_clients, [], 0)
 
-                except Exception as e:
+                except Exception as ex:
                     pass
 
-                for client in self.clients:
+                for client in r:
                     try:
-                        client.send(b'Hello world!')
+                        data = convert_from_bytes(client.recv(1024))
+                        print('W-list contains {}'.format(w))
+                        print('R-list contains {}'.format(r))
+                        if data:
+                            if str(data["action"]) == 'presence':
+                                self.clients = {data['user']: client}
+                            elif str(data["action"]) == 'msg':
+                                print(self.clients[data['to']])
+                            else:
+                                print('Oooops')
+                            print(data)
                     except OSError as e:
                         print('Error!')
                         print(e)
-                        self.clients.remove(client)
+                        self.new_clients.remove(client)
                         print('{} удалён'.format(client))

@@ -1,6 +1,5 @@
 from chat_server import ChatServer
 from config import Config, LoadFromArgparse, LoadFromConsole, LoadFromFile, LoadFromParams
-import select
 
 
 if __name__ == '__main__':
