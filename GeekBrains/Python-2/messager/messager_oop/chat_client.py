@@ -54,11 +54,7 @@ class ChatClient(Chat):
                         to = input('For who: ')
                         txt = input('Enter your message')
 
-                        messg = JimMsg()
-                        messg.name = to
-                        messg.message = txt
-
-                        self.send_message(convert_to_bytes(messg))
+                        self.send_message(convert_to_bytes(JimMsg()))
                     else:
                         self.send_message(convert_to_bytes(msg))
                 except KeyboardInterrupt:

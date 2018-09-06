@@ -63,7 +63,8 @@ class ChatServer(Chat):
                             if str(data["action"]) == 'presence':
                                 self.clients = {data['user']: client}
                             elif str(data["action"]) == 'msg':
-                                print(self.clients[data['to']])
+                                # print(self.clients[data['to']])
+                                print(data)
                             else:
                                 print('Oooops')
                             print(data)
