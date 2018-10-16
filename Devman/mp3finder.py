@@ -52,11 +52,7 @@ def get_song_info_from_mp3_tags(filename):
 
 def filter_tracks(collection, artist):
     """"Return list of track tags dicts for artist."""
-    result = []
-    for track in collection:
-        if track['artist'] == artist:
-            result.append(track)
-    return result
+    return [track for track in collection if track['artist'] == artist]
 
 
 def format_discography(tracks):
@@ -69,8 +65,7 @@ def format_discography(tracks):
         discography[key] = []
         for track in group:
             discography[key].append(track)
-            discography[key] = sorted(discography[key],
-                                      key=lambda x: x['track'])
+        discography[key] = sorted(discography[key], key=lambda x: x['track'])
     return discography
 
 
