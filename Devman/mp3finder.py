@@ -17,18 +17,14 @@ def find_all_tracks():
 
 
 def tags_for_songs(tracks):
-    """"Return list of dicts mp3-tags with tag path from list of tracks."""
-    mp3_collection = []
-    for track in tracks:
-        info = get_song_info_from_mp3_tags(track)
-        info['path'] = track
-        mp3_collection.append(info)
-    return mp3_collection
+    """"Return list of dicts mp3-tags from list of tracks."""
+    return [get_song_info_from_mp3_tags(track) for track in tracks]
 
 
 def get_song_info_from_mp3_tags(filename):
-    """"Return formatted dict with mp3-tags for track from filename string."""
+    """"Return formatted dict with mp3-tags + path for track from filename string."""
     song_info_dict = ast.literal_eval(str(TinyTag.get(filename)))
+    song_info_dict['path'] = filename
     for key, value in song_info_dict.items():
         if type(value) == str:
             value = value.replace('\x00', '')
@@ -71,14 +67,15 @@ def format_discography(tracks):
 
 def print_result(discography):
     for album in discography:
-        print('{} ({})'.format(album, discography[album][0]['year']))
-        if discography[album][0]['disc'] < discography[album][0]['disc_total']:
-            print('    Disc {} of {}'.format(discography[album][0]['disc'],
-                                             discography[album][0]['disc_total']
+        album_item = discography[album]
+        print('{} ({})'.format(album, album_item[0]['year']))
+        if album_item[0]['disc'] < album_item[0]['disc_total']:
+            print('    Disc {} of {}'.format(album_item[0]['disc'],
+                                             album_item[0]['disc_total']
                                              )
                   )
         # не хватает тестовых данных, чтобы допилить сортировку по дискам
-        for track in discography[album]:
+        for track in album_item:
             print('    {}.  "{}" {} ({})'.format(track['track'],
                                                  track['title'],
                                                  track['duration'],
@@ -89,4 +86,4 @@ def print_result(discography):
 
 
 if __name__ == '__main__':
-    print_result(format_discography(filter_tracks(tags_for_songs(find_all_tracks()), sys.argv[1])))
+    print_result(format_discography(filter_tracks(tags_for_songs(find_all_tracks()), 'Nine Inch Nails')))
