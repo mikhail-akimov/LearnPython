@@ -22,7 +22,7 @@ def tags_for_songs(tracks):
 
 
 def get_song_info_from_mp3_tags(filename):
-    """"Return formatted dict with mp3-tags + path for track from filename string."""
+    """"Return dict with mp3-tags + path for track from filename string."""
     song_info_dict = ast.literal_eval(str(TinyTag.get(filename)))
     song_info_dict['path'] = filename
     for key, value in song_info_dict.items():
@@ -86,4 +86,4 @@ def print_result(discography):
 
 
 if __name__ == '__main__':
-    print_result(format_discography(filter_tracks(tags_for_songs(find_all_tracks()), 'Nine Inch Nails')))
+    print_result(format_discography(filter_tracks(tags_for_songs(find_all_tracks()), sys.argv[1])))
