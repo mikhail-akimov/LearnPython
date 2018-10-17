@@ -1,7 +1,6 @@
 from tinytag import TinyTag
 import os
 import sys
-import ast
 from itertools import groupby
 
 
@@ -11,7 +10,7 @@ def find_all_tracks():
     tracks = []
     for root, dirs, names in os.walk(root_dir):
         for name in names:
-            if name[-4::1] == '.mp3':
+            if os.path.splitext(name)[1] == '.mp3':
                 tracks.append(os.path.join(root, name))
     return tracks
 
@@ -21,28 +20,44 @@ def tags_for_songs(tracks):
     return [get_song_info_from_mp3_tags(track) for track in tracks]
 
 
+def str_to_int(key, value, fields):
+    """"Return converted key from str to int for fields."""
+    result = value
+    if key in fields and value:
+        try:
+            result = int(value)
+        except:
+            pass
+    return result
+
+
 def get_song_info_from_mp3_tags(filename):
     """"Return dict with mp3-tags + path for track from filename string."""
-    song_info_dict = ast.literal_eval(str(TinyTag.get(filename)))
+    song_info_dict = {}
+    tags = TinyTag.get(filename)
+    all_attrs = dir(tags)
+    mp3_attrs = [attr_name for attr_name in all_attrs if not attr_name.startswith('_')]
+
+    for attr in mp3_attrs:
+        song_info_dict[attr] = getattr(tags, attr)
     song_info_dict['path'] = filename
+
     for key, value in song_info_dict.items():
         if type(value) == str:
             value = value.replace('\x00', '')
             song_info_dict[key] = value
     for key, value in song_info_dict.items():
-        if key == 'disc' and song_info_dict[key]:
-            song_info_dict[key] = int(song_info_dict[key])
-        if key == 'disc_total' and song_info_dict[key]:
-            song_info_dict[key] = int(song_info_dict[key])
-        if key == 'track' and song_info_dict[key]:
-            song_info_dict[key] = int(song_info_dict[key])
-        if key == 'track_total' and song_info_dict[key]:
-            song_info_dict[key] = int(song_info_dict[key])
-        if key == 'year' and song_info_dict[key]:
-            song_info_dict[key] = int(song_info_dict[key])
+        fields_to_int = ('disc', 'disc_total', 'track', 'track_total', 'year')
+
+        song_info_dict[key] = str_to_int(key, song_info_dict[key], fields_to_int)
+
         if key == 'duration' and song_info_dict[key]:
-            song_info_dict[key] = '{}:{}'.format(int(song_info_dict[key] // 60),
-                                                 int(song_info_dict[key] % 60))
+            try:
+                song_info_dict[key] = '{}:{}'.format(int(song_info_dict[key] // 60),
+                                                     int(song_info_dict[key] % 60))
+            except:
+                pass
+
     return song_info_dict
 
 
@@ -58,9 +73,7 @@ def format_discography(tracks):
     """
     discography = {}
     for key, group in groupby(tracks, lambda x: x['album']):
-        discography[key] = []
-        for track in group:
-            discography[key].append(track)
+        discography[key] = list(group)
         discography[key] = sorted(discography[key], key=lambda x: x['track'])
     return discography
 
@@ -68,10 +81,12 @@ def format_discography(tracks):
 def print_result(discography):
     for album in discography:
         album_item = discography[album]
-        print('{} ({})'.format(album, album_item[0]['year']))
-        if album_item[0]['disc'] < album_item[0]['disc_total']:
-            print('    Disc {} of {}'.format(album_item[0]['disc'],
-                                             album_item[0]['disc_total']
+        album_first_item = discography[album][0]
+        print(discography[album])
+        print('{} ({})'.format(album, album_first_item['year']))
+        if album_first_item['disc'] < album_first_item['disc_total']:
+            print('    Disc {} of {}'.format(album_first_item['disc'],
+                                             album_first_item['disc_total']
                                              )
                   )
         # не хватает тестовых данных, чтобы допилить сортировку по дискам
