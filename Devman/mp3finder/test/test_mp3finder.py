@@ -34,8 +34,6 @@ def test_get_song_info_from_mp3_tags():
 def test_tags_for_songs():
     isinstance(tags_for_songs([path]), list)
 
-# Monkeypatching!
-
 
 def test_filter_tracks():
     isinstance(filter_tracks([tags], tags.get('artist')), list)

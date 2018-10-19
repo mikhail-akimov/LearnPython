@@ -23,10 +23,12 @@ def tags_for_songs(tracks):
 def str_to_int(key, value, fields):
     """"Return converted key from str to int for fields."""
     result = value
-    if key in fields and value:
+    if key in fields:
         try:
             result = int(value)
-        except:
+        except TypeError as e:
+            pass
+        except ValueError as ve:
             pass
     return result
 
@@ -55,7 +57,7 @@ def get_song_info_from_mp3_tags(filename):
             try:
                 song_info_dict[key] = '{}:{}'.format(int(song_info_dict[key] // 60),
                                                      int(song_info_dict[key] % 60))
-            except:
+            except ValueError as ve:
                 pass
 
     return song_info_dict
@@ -82,7 +84,7 @@ def print_result(discography):
     for album in discography:
         album_item = discography[album]
         album_first_item = discography[album][0]
-        print(discography[album])
+
         print('{} ({})'.format(album, album_first_item['year']))
         if album_first_item['disc'] and album_first_item['disc_total']:
             if album_first_item['disc'] < album_first_item['disc_total']:
