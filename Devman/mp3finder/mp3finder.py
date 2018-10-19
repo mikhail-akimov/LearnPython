@@ -84,12 +84,12 @@ def print_result(discography):
         album_first_item = discography[album][0]
         print(discography[album])
         print('{} ({})'.format(album, album_first_item['year']))
-        if album_first_item['disc'] < album_first_item['disc_total']:
-            print('    Disc {} of {}'.format(album_first_item['disc'],
-                                             album_first_item['disc_total']
-                                             )
-                  )
-        # не хватает тестовых данных, чтобы допилить сортировку по дискам
+        if album_first_item['disc'] and album_first_item['disc_total']:
+            if album_first_item['disc'] < album_first_item['disc_total']:
+                print('    Disc {} of {}'.format(album_first_item['disc'],
+                                                 album_first_item['disc_total']
+                                                 )
+                      )
         for track in album_item:
             print('    {}.  "{}" {} ({})'.format(track['track'],
                                                  track['title'],

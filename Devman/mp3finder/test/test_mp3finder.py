@@ -1,10 +1,15 @@
 from mp3finder import str_to_int, find_all_tracks, tags_for_songs, get_song_info_from_mp3_tags, \
-    filter_tracks
+    filter_tracks, format_discography, print_result
+import song_collection
 import os
+
 
 path = os.path.join('test', os.path.split(str(find_all_tracks()[0]))[-1])
 mp3_file = os.path.split(str(find_all_tracks()[0]))[-1]
 tags = get_song_info_from_mp3_tags(path)
+song_collection = song_collection.song_list
+discography = format_discography(filter_tracks(song_collection, 'Nine Inch Nails'))
+
 
 def test_str_to_int():
     assert str_to_int('1', '12', ['1', '2', '3']) == 12
@@ -29,6 +34,8 @@ def test_get_song_info_from_mp3_tags():
 def test_tags_for_songs():
     isinstance(tags_for_songs([path]), list)
 
+# Monkeypatching!
+
 
 def test_filter_tracks():
     isinstance(filter_tracks([tags], tags.get('artist')), list)
@@ -36,9 +43,7 @@ def test_filter_tracks():
     assert filter_tracks([tags], 'test') != [tags]
 
 
-
-
-
-
-
+def test_format_discography():
+    assert [key for key in discography] == ['The Slip']
+    assert discography['The Slip'][0]['track'] < discography['The Slip'][1]['track']
 
