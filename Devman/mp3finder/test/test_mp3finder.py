@@ -44,6 +44,8 @@ def test_filter_tracks():
 
 
 def test_format_discography():
+    assert isinstance(discography, dict)
+    assert isinstance(discography['The Slip'], list)
     assert [key for key in discography] == ['The Slip']
     assert discography['The Slip'][0]['track'] < discography['The Slip'][1]['track']
 
