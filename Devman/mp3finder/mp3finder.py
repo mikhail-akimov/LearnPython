@@ -39,6 +39,7 @@ def get_song_info_from_mp3_tags(filename):
     tags = TinyTag.get(filename)
     all_attrs = dir(tags)
     mp3_attrs = [attr_name for attr_name in all_attrs if not attr_name.startswith('_')]
+    fields_to_int = ('disc', 'disc_total', 'track', 'track_total', 'year')
 
     for attr in mp3_attrs:
         song_info_dict[attr] = getattr(tags, attr)
@@ -49,8 +50,6 @@ def get_song_info_from_mp3_tags(filename):
             value = value.replace('\x00', '')
             song_info_dict[key] = value
     for key, value in song_info_dict.items():
-        fields_to_int = ('disc', 'disc_total', 'track', 'track_total', 'year')
-
         song_info_dict[key] = str_to_int(key, song_info_dict[key], fields_to_int)
 
         if key == 'duration' and song_info_dict[key]:
