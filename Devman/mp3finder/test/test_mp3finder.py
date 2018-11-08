@@ -22,7 +22,6 @@ def test_str_to_int():
 def test_find_all_tracks():
     assert mp3_file == 'test_file.mp3'
     assert isinstance(find_all_tracks(), list)
-    assert find_all_tracks() == [mp3_file]
 
 
 def test_get_song_info_from_mp3_tags():
