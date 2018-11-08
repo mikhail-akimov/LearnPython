@@ -74,8 +74,7 @@ def format_discography(tracks):
     """
     discography = {}
     for key, group in groupby(tracks, lambda x: x['album']):
-        discography[key] = list(group)
-        discography[key] = sorted(discography[key], key=lambda x: x['track'])
+        discography[key] = sorted(group, key=lambda x: x['track'])
     return discography
 
 
@@ -87,17 +86,9 @@ def print_result(discography):
         print('{} ({})'.format(album, album_first_item['year']))
         if album_first_item['disc'] and album_first_item['disc_total']:
             if album_first_item['disc'] < album_first_item['disc_total']:
-                print('    Disc {} of {}'.format(album_first_item['disc'],
-                                                 album_first_item['disc_total']
-                                                 )
-                      )
+                print('    Disc {obj[disc]} of {obj[disc_total]}'.format(obj=album_first_item))
         for track in album_item:
-            print('    {}.  "{}" {} ({})'.format(track['track'],
-                                                 track['title'],
-                                                 track['duration'],
-                                                 track['path']
-                                                 )
-                  )
+            print('    {track[track]}.  "{track[title]}" {track[duration]} ({track[path]})'.format(track=track))
     return True
 
 
